@@ -723,14 +723,15 @@ function submitForm() {
     + 'OBJECTIFS INDIVIDUELS :\n' + (objStr.replace(/ \| /g,'\n')||'Non renseigne') + '\n\n'
     + 'AIDE ATTENDUE :\n' + (aide||'Non renseigne') + '\n\n'
     + 'CHALLENGES : ' + (selectedChallenges.join(', ')||'Non renseigne') + '\n\n'
-    + 'Le fichier CSV est joint a cet email.\n\nCordialement';
+    + '⚠️ N\'OUBLIEZ PAS de joindre le fichier CSV telecharge avant d\'envoyer.\n\nCordialement';
 
   var subject = encodeURIComponent('Point mensuel ' + store.name + ' - ' + MOIS[mois] + ' ' + annee);
   setTimeout(function(){
+    alert('✅ Etape 1 sur 2 : votre CSV est telecharge dans vos fichiers.\n\n📧 Etape 2 sur 2 : l\'email va s\'ouvrir.\nPensez a joindre le fichier CSV avant d\'appuyer sur Envoyer !');
     window.location.href = 'mailto:cyril.gauthier@optical-center.com?subject=' + subject + '&body=' + encodeURIComponent(body);
   }, 600);
 
-  showToast('CSV telecharge - email pret!');
+  showToast('CSV telecharge - pensez a le joindre!');
   resetForm();
 }
 
