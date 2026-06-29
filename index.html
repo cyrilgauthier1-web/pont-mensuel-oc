@@ -127,6 +127,7 @@
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('form',this)">Formulaire</button>
     <button class="tab-btn" onclick="switchTab('ar',this)" id="tab-ar">Vue AR</button>
+    <button class="tab-btn" onclick="switchTab('params',this)">⚙️ Params</button>
   </div>
 </div>
 
@@ -279,7 +280,30 @@
   <div id="ar-responses"></div>
 </div>
 
-<!-- Modal -->
+<!-- PARAMETRES -->
+<div class="view" id="view-params">
+  <div class="card">
+    <div class="card-label">Selectionner un magasin</div>
+    <select id="param-magasin" onchange="loadParamMagasin()">
+      <option value="">— Choisir un magasin —</option>
+    </select>
+  </div>
+
+  <div id="param-store-block" style="display:none">
+    <div class="card">
+      <div class="card-label">Effectif (pour calcul budget)</div>
+      <input type="number" id="param-effectif" min="1" max="30" placeholder="Ex: 5">
+    </div>
+
+    <div class="card">
+      <div class="card-label">Equipe</div>
+      <div id="param-membres-list"></div>
+      <button class="add-person-btn" onclick="paramAddMembre()" style="margin-top:8px">+ Ajouter</button>
+    </div>
+
+    <button class="submit-btn" onclick="saveParamMagasin()">Sauvegarder ce magasin</button>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-title">Ajouter un collaborateur</div>
@@ -316,17 +340,17 @@ var STORES = [
     {prenom:'Simha',nom:'Assouline',role:'collab'}
   ]},
   { code:'1073', name:'Lyon Freres Lumiere', effectif:6, membres:[
-    {prenom:'Christelle',nom:'Ajorque',role:'manager'},
-    {prenom:'Gabrielle',nom:'Riviere',role:'collab'},
+    {prenom:'Gabrielle',nom:'Riviere',role:'manager'},
+    {prenom:'Christelle',nom:'Ajorque',role:'collab'},
     {prenom:'Noemie',nom:'Allain',role:'collab'},
     {prenom:'Hugo',nom:'Marques',role:'collab'},
     {prenom:'Angele',nom:'Bouffard',role:'collab'},
     {prenom:'Rytis',nom:'Vadi',role:'collab'}
   ]},
   { code:'1068', name:'Lyon Perrache', effectif:4, membres:[
-    {prenom:'Sylvie',nom:'Cardot',role:'manager'},
+    {prenom:'Armelle',nom:'Rochat',role:'manager'},
+    {prenom:'Sylvie',nom:'Cardot',role:'collab'},
     {prenom:'Inesa',nom:'Duchol',role:'collab'},
-    {prenom:'Armelle',nom:'Rochat',role:'collab'},
     {prenom:'Salome',nom:'Hareau',role:'collab'}
   ]},
   { code:'1111', name:'Lyon Republique', effectif:5, membres:[
@@ -357,22 +381,22 @@ var STORES = [
     {prenom:'Ora',nom:'Cohen',role:'collab'}
   ]},
   { code:'1017', name:'Grenoble', effectif:4, membres:[
-    {prenom:'Julien',nom:'Lelaquet',role:'manager'},
+    {prenom:'Guillaume',nom:'Michel',role:'manager'},
+    {prenom:'Julien',nom:'Lelaquet',role:'collab'},
     {prenom:'Melina',nom:'Maranos',role:'collab'},
-    {prenom:'Melvin',nom:'Tardos',role:'collab'},
-    {prenom:'Guillaume',nom:'Michel',role:'collab'}
+    {prenom:'Melvin',nom:'Tardos',role:'collab'}
   ]},
   { code:'1060', name:'Meylan', effectif:5, membres:[
-    {prenom:'Soraya',nom:'Mansour-Khantache',role:'manager'},
+    {prenom:'Guillaume',nom:'Vincens De Tapol',role:'manager'},
+    {prenom:'Soraya',nom:'Mansour-Khantache',role:'collab'},
     {prenom:'Yael',nom:'Msika',role:'collab'},
-    {prenom:'Guillaume',nom:'Vincens De Tapol',role:'collab'},
     {prenom:'Terry',nom:'Gaudfrin',role:'collab'},
     {prenom:'Mallaury',nom:'Multeau',role:'collab'}
   ]},
   { code:'1090', name:'Saint-Martin-d-Heres', effectif:7, membres:[
-    {prenom:'Stephanie',nom:'Geron',role:'manager'},
+    {prenom:'Francoise',nom:'Porta',role:'manager'},
+    {prenom:'Stephanie',nom:'Geron',role:'collab'},
     {prenom:'Claire',nom:'Bernard',role:'collab'},
-    {prenom:'Francoise',nom:'Porta',role:'collab'},
     {prenom:'Nadia',nom:'Immel',role:'collab'},
     {prenom:'Marin',nom:'Favier',role:'collab'},
     {prenom:'Mathis',nom:'Loze',role:'collab'},
@@ -392,10 +416,10 @@ var STORES = [
     {prenom:'Clea',nom:'Quantin',role:'collab'}
   ]},
   { code:'1018', name:'Marseille Rome', effectif:10, membres:[
-    {prenom:'Daniel',nom:'Aiglin',role:'manager'},
+    {prenom:'Agathe',nom:'Klein',role:'manager'},
+    {prenom:'Daniel',nom:'Aiglin',role:'collab'},
     {prenom:'Radjabou',nom:'Ahamada',role:'collab'},
     {prenom:'Herve',nom:'Mallet',role:'collab'},
-    {prenom:'Agathe',nom:'Klein',role:'collab'},
     {prenom:'Sharon',nom:'Dray',role:'collab'},
     {prenom:'Oriane',nom:'Picaud',role:'collab'},
     {prenom:'Coraline',nom:'Bourgeois',role:'collab'},
@@ -423,18 +447,18 @@ var STORES = [
     {prenom:'Lola',nom:'Israel',role:'collab'}
   ]},
   { code:'1062', name:'Vitrolles', effectif:6, membres:[
-    {prenom:'Philippe',nom:'Autusse',role:'manager'},
-    {prenom:'Jean Thomas',nom:'Antolini',role:'collab'},
+    {prenom:'Jean Thomas',nom:'Antolini',role:'manager'},
+    {prenom:'Philippe',nom:'Autusse',role:'collab'},
     {prenom:'Aurore',nom:'Lederle',role:'collab'},
     {prenom:'Fabrice',nom:'Matos',role:'collab'},
     {prenom:'Julia',nom:'Cohen',role:'collab'},
     {prenom:'Matteo',nom:'Pazier',role:'collab'}
   ]},
   { code:'1077', name:'Grand Epagny', effectif:6, membres:[
-    {prenom:'Teina',nom:'Rainisio',role:'manager'},
+    {prenom:'Swani',nom:'Vincens De Tapol',role:'manager'},
+    {prenom:'Teina',nom:'Rainisio',role:'collab'},
     {prenom:'Fanny',nom:'Hudry',role:'collab'},
     {prenom:'Noelle',nom:'Bulloz',role:'collab'},
-    {prenom:'Swani',nom:'Vincens De Tapol',role:'collab'},
     {prenom:'Laurene',nom:'Rachidi',role:'collab'},
     {prenom:'Constance',nom:'Barrue',role:'collab'}
   ]},
@@ -494,11 +518,18 @@ function loadData() {
 }
 
 function init() {
+  // Charger stores personnalises si existants
+  try {
+    var custom = localStorage.getItem('oc_stores_custom');
+    if(custom) { var parsed = JSON.parse(custom); if(parsed&&parsed.length) { STORES.length=0; for(var x=0;x<parsed.length;x++) STORES.push(parsed[x]); } }
+  } catch(e){}
+
   var now = new Date();
   document.getElementById('sel-mois').value = now.getMonth()+1;
 
   var selF = document.getElementById('sel-magasin');
   var selAR = document.getElementById('ar-magasin');
+  var selP = document.getElementById('param-magasin');
   for(var i=0; i<STORES.length; i++) {
     var s = STORES[i];
     var mgr = null;
@@ -506,6 +537,7 @@ function init() {
     var label = s.name + (mgr ? ' - ' + mgr.prenom + ' ' + mgr.nom : '');
     var opt1 = document.createElement('option'); opt1.value=s.code; opt1.textContent=label; selF.appendChild(opt1);
     var opt2 = document.createElement('option'); opt2.value=s.code; opt2.textContent=s.name; selAR.appendChild(opt2);
+    var opt3 = document.createElement('option'); opt3.value=s.code; opt3.textContent=s.name; selP.appendChild(opt3);
   }
 
   var cl = document.getElementById('challenge-list');
@@ -945,6 +977,87 @@ function exportCSV() {
   var a = document.createElement('a');
   a.href=url; a.download='OC_Synthese_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click(); URL.revokeObjectURL(url);
+}
+
+// PARAMETRES
+function loadParamMagasin() {
+  var code = document.getElementById('param-magasin').value;
+  var block = document.getElementById('param-store-block');
+  if(!code){ block.style.display='none'; return; }
+  var store = null;
+  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
+  if(!store){ block.style.display='none'; return; }
+  block.style.display='block';
+  document.getElementById('param-effectif').value = store.effectif;
+  renderParamMembres(store.membres);
+}
+
+function renderParamMembres(membres) {
+  var cont = document.getElementById('param-membres-list');
+  var html = '';
+  for(var i=0; i<membres.length; i++) {
+    html += '<div class="obj-row" id="pm-row-'+i+'">' +
+      '<div style="flex:1;display:flex;gap:6px">' +
+      '<input type="text" value="'+membres[i].prenom+'" id="pm-prenom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px">' +
+      '<input type="text" value="'+membres[i].nom+'" id="pm-nom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px">' +
+      '</div>' +
+      '<select id="pm-role-'+i+'" style="flex:0 0 110px;font-size:12px;padding:8px 6px">' +
+      '<option value="manager"'+(membres[i].role==='manager'?' selected':'')+'>Manager</option>' +
+      '<option value="collab"'+(membres[i].role==='collab'?' selected':'')+'>Collab</option>' +
+      '</select>' +
+      '<button onclick="paramDeleteMembre('+i+')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px">x</button>' +
+      '</div>';
+  }
+  cont.innerHTML = html;
+}
+
+function paramDeleteMembre(i) {
+  var code = document.getElementById('param-magasin').value;
+  var store = null;
+  for(var j=0; j<STORES.length; j++) { if(STORES[j].code===code){ store=STORES[j]; break; } }
+  if(!store) return;
+  store.membres.splice(i,1);
+  renderParamMembres(store.membres);
+}
+
+function paramAddMembre() {
+  var code = document.getElementById('param-magasin').value;
+  var store = null;
+  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
+  if(!store) return;
+  store.membres.push({prenom:'Prenom', nom:'Nom', role:'collab'});
+  renderParamMembres(store.membres);
+}
+
+function saveParamMagasin() {
+  var code = document.getElementById('param-magasin').value;
+  var store = null;
+  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
+  if(!store) return;
+  store.effectif = parseInt(document.getElementById('param-effectif').value)||store.effectif;
+  var newMembres = [];
+  var rows = document.querySelectorAll('[id^="pm-prenom-"]');
+  for(var j=0; j<rows.length; j++) {
+    newMembres.push({
+      prenom: document.getElementById('pm-prenom-'+j).value.trim(),
+      nom:    document.getElementById('pm-nom-'+j).value.trim(),
+      role:   document.getElementById('pm-role-'+j).value
+    });
+  }
+  store.membres = newMembres;
+  // Sauvegarder dans localStorage
+  try { localStorage.setItem('oc_stores_custom', JSON.stringify(STORES)); } catch(e){}
+  // Rafraichir le select magasin du formulaire
+  var selF = document.getElementById('sel-magasin');
+  selF.innerHTML = '<option value="">— Selectionner votre magasin —</option>';
+  for(var k=0; k<STORES.length; k++) {
+    var s = STORES[k];
+    var mgr = null;
+    for(var m=0; m<s.membres.length; m++) { if(s.membres[m].role==='manager'){ mgr=s.membres[m]; break; } }
+    var label = s.name + (mgr ? ' - ' + mgr.prenom + ' ' + mgr.nom : '');
+    var opt = document.createElement('option'); opt.value=s.code; opt.textContent=label; selF.appendChild(opt);
+  }
+  showToast('Magasin sauvegarde !');
 }
 
 function showToast(msg) {
