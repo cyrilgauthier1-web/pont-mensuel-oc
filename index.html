@@ -20,7 +20,7 @@
   .header-title { font-size: 16px; font-weight: 600; }
   .header-sub { font-size: 11px; color: var(--texte-dim); }
   .tab-bar { display: flex; gap: 4px; }
-  .tab-btn { flex: 1; padding: 8px 4px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--texte-dim); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .tab-btn { flex: 1; padding: 8px 4px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--texte-dim); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; }
   .tab-btn.active { background: var(--gris-clair); color: var(--or); }
   .view { display: none; padding: 16px 14px 100px; }
   .view.active { display: block; }
@@ -57,9 +57,10 @@
   .role-collab  { background: rgba(201,168,76,.2); color: var(--or-light); }
   .obj-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .obj-name { flex: 1; font-size: 13px; font-weight: 500; padding: 9px 11px; background: var(--gris-moyen); border-radius: var(--radius-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .obj-input-wrap { flex: 0 0 110px; position: relative; }
-  .obj-input-wrap input { text-align: right; padding-right: 26px; font-size: 14px; }
-  .obj-input-wrap::after { content: 'EUR'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: var(--texte-dim); font-size: 11px; pointer-events: none; }
+  .obj-mat { flex: 0 0 60px; font-size: 11px; color: var(--texte-dim); padding: 9px 6px; background: var(--gris-moyen); border-radius: var(--radius-sm); text-align: center; }
+  .obj-input-wrap { flex: 0 0 100px; position: relative; }
+  .obj-input-wrap input { text-align: right; padding-right: 30px; font-size: 14px; }
+  .obj-input-wrap::after { content: 'EUR'; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); color: var(--texte-dim); font-size: 10px; pointer-events: none; }
   .add-person-btn { width: 100%; padding: 10px; background: transparent; border: 1.5px dashed var(--gris-clair); border-radius: var(--radius-sm); color: var(--texte-dim); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
   .modal-overlay.open { display: flex; }
@@ -97,7 +98,8 @@
   .obj-tag.mgr { background: rgba(48,209,88,.1); border-color: rgba(48,209,88,.3); color: var(--success); }
   .empty-state { text-align: center; padding: 50px 20px; color: var(--texte-dim); }
   .empty-state .e-icon { font-size: 40px; margin-bottom: 10px; }
-  .action-btn { width: 100%; padding: 12px; background: var(--gris-moyen); border: 1.5px solid var(--gris-clair); border-radius: var(--radius-sm); color: var(--texte); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+  .action-btn { width: 100%; padding: 12px; background: var(--gris-moyen); border: 1.5px solid var(--gris-clair); border-radius: var(--radius-sm); color: var(--texte); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 8px; text-align: center; }
+  .action-btn.or { border-color: var(--or); color: var(--or); }
   .action-btn.danger { color: var(--danger); border-color: rgba(255,69,58,.3); }
   .delete-btn { background: none; border: none; color: var(--danger); font-size: 13px; cursor: pointer; padding: 4px; }
   .periode-wrap { display: flex; gap: 8px; }
@@ -127,13 +129,12 @@
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('form',this)">Formulaire</button>
     <button class="tab-btn" onclick="switchTab('ar',this)" id="tab-ar">Vue AR</button>
-    <button class="tab-btn" onclick="switchTab('params',this)">⚙️ Params</button>
+    <button class="tab-btn" onclick="switchTab('params',this)">Params</button>
   </div>
 </div>
 
 <!-- FORMULAIRE -->
 <div class="view active" id="view-form">
-
   <div class="card">
     <div class="card-label">Identification</div>
     <select id="sel-magasin" onchange="onMagasinChange()">
@@ -232,7 +233,6 @@
 
 <!-- VUE AR -->
 <div class="view" id="view-ar">
-
   <div class="card">
     <div class="card-label">Importer des reponses CSV</div>
     <div class="drop-zone" id="drop-zone"
@@ -272,7 +272,8 @@
       <option value="">Tous les magasins</option>
     </select>
     <div class="spacer"></div>
-    <button class="action-btn" onclick="exportCSV()">Exporter consolide CSV</button>
+    <button class="action-btn" onclick="exportSynthese()">Export 1 – Synthese globale</button>
+    <button class="action-btn or" onclick="exportObjectifsCosium()">Export 2 – Objectifs Cosium (matricule)</button>
     <button class="action-btn danger" onclick="clearAll()">Vider toutes les reponses</button>
   </div>
 
@@ -288,27 +289,27 @@
       <option value="">— Choisir un magasin —</option>
     </select>
   </div>
-
   <div id="param-store-block" style="display:none">
     <div class="card">
       <div class="card-label">Effectif (pour calcul budget)</div>
       <input type="number" id="param-effectif" min="1" max="30" placeholder="Ex: 5">
     </div>
-
     <div class="card">
       <div class="card-label">Equipe</div>
       <div id="param-membres-list"></div>
       <button class="add-person-btn" onclick="paramAddMembre()" style="margin-top:8px">+ Ajouter</button>
     </div>
-
     <button class="submit-btn" onclick="saveParamMagasin()">Sauvegarder ce magasin</button>
   </div>
 </div>
+
+<!-- Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal">
     <div class="modal-title">Ajouter un collaborateur</div>
     <input type="text" id="modal-prenom" placeholder="Prenom" style="margin-bottom:8px">
-    <input type="text" id="modal-nom" placeholder="Nom" style="margin-bottom:12px">
+    <input type="text" id="modal-nom" placeholder="Nom" style="margin-bottom:8px">
+    <input type="text" id="modal-matricule" placeholder="Matricule" style="margin-bottom:12px">
     <div class="modal-role-select">
       <button class="role-btn sel-collab" id="rb-collab" onclick="selectRole('collab')">Collaborateur</button>
       <button class="role-btn" id="rb-manager" onclick="selectRole('manager')">Manager</button>
@@ -325,253 +326,231 @@
 <script>
 var STORES = [
   { code:'1009', name:'Lyon Bourse', effectif:5, membres:[
-    {prenom:'Jeremy',nom:'Abbou',role:'manager'},
-    {prenom:'Jean-Pierre',nom:'Vernet',role:'collab'},
-    {prenom:'Guillaume',nom:'Froment',role:'collab'},
-    {prenom:'Sabrina',nom:'Gay',role:'collab'},
-    {prenom:'Audrey',nom:'Fromentiere',role:'collab'}
+    {matricule:3520,prenom:'Jeremy',nom:'Abbou',role:'manager'},
+    {matricule:2748,prenom:'Jean-Pierre',nom:'Vernet',role:'collab'},
+    {matricule:3785,prenom:'Guillaume',nom:'Froment',role:'collab'},
+    {matricule:4095,prenom:'Sabrina',nom:'Gay',role:'collab'},
+    {matricule:5387,prenom:'Audrey',nom:'Fromentiere',role:'collab'}
   ]},
   { code:'1011', name:'Lyon Part-Dieu', effectif:6, membres:[
-    {prenom:'Francois',nom:'Guillon-Cottard',role:'manager'},
-    {prenom:'Leila',nom:'Moreau',role:'collab'},
-    {prenom:'Gaelle',nom:'Wateau',role:'collab'},
-    {prenom:'Thomas',nom:'Gomes',role:'collab'},
-    {prenom:'Amine',nom:'Balbzioui',role:'collab'},
-    {prenom:'Simha',nom:'Assouline',role:'collab'}
+    {matricule:3967,prenom:'Francois',nom:'Guillon-Cottard',role:'manager'},
+    {matricule:4327,prenom:'Leila',nom:'Moreau',role:'collab'},
+    {matricule:4466,prenom:'Gaelle',nom:'Wateau',role:'collab'},
+    {matricule:5021,prenom:'Thomas',nom:'Gomes',role:'collab'},
+    {matricule:5242,prenom:'Amine',nom:'Balbzioui',role:'collab'},
+    {matricule:5507,prenom:'Simha',nom:'Assouline',role:'collab'}
   ]},
   { code:'1073', name:'Lyon Freres Lumiere', effectif:6, membres:[
-    {prenom:'Gabrielle',nom:'Riviere',role:'manager'},
-    {prenom:'Christelle',nom:'Ajorque',role:'collab'},
-    {prenom:'Noemie',nom:'Allain',role:'collab'},
-    {prenom:'Hugo',nom:'Marques',role:'collab'},
-    {prenom:'Angele',nom:'Bouffard',role:'collab'},
-    {prenom:'Rytis',nom:'Vadi',role:'collab'}
+    {matricule:4576,prenom:'Gabrielle',nom:'Riviere',role:'manager'},
+    {matricule:3999,prenom:'Christelle',nom:'Ajorque',role:'collab'},
+    {matricule:4617,prenom:'Noemie',nom:'Allain',role:'collab'},
+    {matricule:5290,prenom:'Hugo',nom:'Marques',role:'collab'},
+    {matricule:5560,prenom:'Angele',nom:'Bouffard',role:'collab'},
+    {matricule:5614,prenom:'Rytis',nom:'Vadi',role:'collab'}
   ]},
   { code:'1068', name:'Lyon Perrache', effectif:4, membres:[
-    {prenom:'Armelle',nom:'Rochat',role:'manager'},
-    {prenom:'Sylvie',nom:'Cardot',role:'collab'},
-    {prenom:'Inesa',nom:'Duchol',role:'collab'},
-    {prenom:'Salome',nom:'Hareau',role:'collab'}
+    {matricule:4740,prenom:'Armelle',nom:'Rochat',role:'manager'},
+    {matricule:1167,prenom:'Sylvie',nom:'Cardot',role:'collab'},
+    {matricule:4725,prenom:'Inesa',nom:'Duchol',role:'collab'},
+    {matricule:5513,prenom:'Salome',nom:'Hareau',role:'collab'}
   ]},
   { code:'1111', name:'Lyon Republique', effectif:5, membres:[
-    {prenom:'Julien',nom:'Boeuf',role:'manager'},
-    {prenom:'Flore Lise',nom:'Reverchon',role:'collab'},
-    {prenom:'Camille',nom:'Genna',role:'collab'},
-    {prenom:'Cyril',nom:'Chamak',role:'collab'},
-    {prenom:'Anthony',nom:'Chatard',role:'collab'}
+    {matricule:3156,prenom:'Julien',nom:'Boeuf',role:'manager'},
+    {matricule:2245,prenom:'Flore Lise',nom:'Reverchon',role:'collab'},
+    {matricule:4547,prenom:'Camille',nom:'Genna',role:'collab'},
+    {matricule:5264,prenom:'Cyril',nom:'Chamak',role:'collab'},
+    {matricule:5389,prenom:'Anthony',nom:'Chatard',role:'collab'}
   ]},
   { code:'1032', name:'Annecy', effectif:8, membres:[
-    {prenom:'Mathilde',nom:'Silvestrin',role:'manager'},
-    {prenom:'Sophie',nom:'Fauchois',role:'collab'},
-    {prenom:'Angelique',nom:'De Vreese',role:'collab'},
-    {prenom:'Noemie',nom:'Pressoir',role:'collab'},
-    {prenom:'Rodolphe',nom:'Voiron',role:'collab'},
-    {prenom:'Lili',nom:'Rousselot',role:'collab'},
-    {prenom:'Katia',nom:'Estefo',role:'collab'},
-    {prenom:'Camille',nom:'Pimont',role:'collab'}
+    {matricule:4047,prenom:'Mathilde',nom:'Silvestrin',role:'manager'},
+    {matricule:4648,prenom:'Sophie',nom:'Fauchois',role:'collab'},
+    {matricule:5562,prenom:'Angelique',nom:'De Vreese',role:'collab'},
+    {matricule:5587,prenom:'Noemie',nom:'Pressoir',role:'collab'},
+    {matricule:5611,prenom:'Rodolphe',nom:'Voiron',role:'collab'},
+    {matricule:5682,prenom:'Lili',nom:'Rousselot',role:'collab'},
+    {matricule:5780,prenom:'Katia',nom:'Estefo',role:'collab'},
+    {matricule:5805,prenom:'Camille',nom:'Pimont',role:'collab'}
   ]},
   { code:'1038', name:'Annemasse', effectif:8, membres:[
-    {prenom:'Loris',nom:'Dumont',role:'manager'},
-    {prenom:'Eleonore',nom:'Millet',role:'collab'},
-    {prenom:'Kevin',nom:'Correia Marante',role:'collab'},
-    {prenom:'Bernadine',nom:'Garaut',role:'collab'},
-    {prenom:'Noa',nom:'Munoz',role:'collab'},
-    {prenom:'Johan',nom:'Kenidra',role:'collab'},
-    {prenom:'Ela',nom:'Sarikaya',role:'collab'},
-    {prenom:'Ora',nom:'Cohen',role:'collab'}
+    {matricule:4279,prenom:'Loris',nom:'Dumont',role:'manager'},
+    {matricule:232, prenom:'Eleonore',nom:'Millet',role:'collab'},
+    {matricule:4173,prenom:'Kevin',nom:'Correia Marante',role:'collab'},
+    {matricule:4930,prenom:'Bernadine',nom:'Garaut',role:'collab'},
+    {matricule:5357,prenom:'Noa',nom:'Munoz',role:'collab'},
+    {matricule:5520,prenom:'Johan',nom:'Kenidra',role:'collab'},
+    {matricule:5707,prenom:'Ela',nom:'Sarikaya',role:'collab'},
+    {matricule:5753,prenom:'Ora',nom:'Cohen',role:'collab'}
   ]},
   { code:'1017', name:'Grenoble', effectif:4, membres:[
-    {prenom:'Guillaume',nom:'Michel',role:'manager'},
-    {prenom:'Julien',nom:'Lelaquet',role:'collab'},
-    {prenom:'Melina',nom:'Maranos',role:'collab'},
-    {prenom:'Melvin',nom:'Tardos',role:'collab'}
+    {matricule:4975,prenom:'Guillaume',nom:'Michel',role:'manager'},
+    {matricule:4530,prenom:'Julien',nom:'Lelaquet',role:'collab'},
+    {matricule:4593,prenom:'Melina',nom:'Maranos',role:'collab'},
+    {matricule:4773,prenom:'Melvin',nom:'Tardos',role:'collab'}
   ]},
   { code:'1060', name:'Meylan', effectif:5, membres:[
-    {prenom:'Guillaume',nom:'Vincens De Tapol',role:'manager'},
-    {prenom:'Soraya',nom:'Mansour-Khantache',role:'collab'},
-    {prenom:'Yael',nom:'Msika',role:'collab'},
-    {prenom:'Terry',nom:'Gaudfrin',role:'collab'},
-    {prenom:'Mallaury',nom:'Multeau',role:'collab'}
+    {matricule:3846,prenom:'Guillaume',nom:'Vincens De Tapol',role:'manager'},
+    {matricule:1242,prenom:'Soraya',nom:'Mansour-Khantache',role:'collab'},
+    {matricule:3815,prenom:'Yael',nom:'Msika',role:'collab'},
+    {matricule:4169,prenom:'Terry',nom:'Gaudfrin',role:'collab'},
+    {matricule:4706,prenom:'Mallaury',nom:'Multeau',role:'collab'}
   ]},
   { code:'1090', name:'Saint-Martin-d-Heres', effectif:7, membres:[
-    {prenom:'Francoise',nom:'Porta',role:'manager'},
-    {prenom:'Stephanie',nom:'Geron',role:'collab'},
-    {prenom:'Claire',nom:'Bernard',role:'collab'},
-    {prenom:'Nadia',nom:'Immel',role:'collab'},
-    {prenom:'Marin',nom:'Favier',role:'collab'},
-    {prenom:'Mathis',nom:'Loze',role:'collab'},
-    {prenom:'Samuel',nom:'Hilaire',role:'collab'}
+    {matricule:3204,prenom:'Francoise',nom:'Porta',role:'manager'},
+    {matricule:2308,prenom:'Stephanie',nom:'Geron',role:'collab'},
+    {matricule:1241,prenom:'Claire',nom:'Bernard',role:'collab'},
+    {matricule:4514,prenom:'Nadia',nom:'Immel',role:'collab'},
+    {matricule:5497,prenom:'Marin',nom:'Favier',role:'collab'},
+    {matricule:5512,prenom:'Mathis',nom:'Loze',role:'collab'},
+    {matricule:5719,prenom:'Samuel',nom:'Hilaire',role:'collab'}
   ]},
   { code:'1093', name:'Seyssins', effectif:11, membres:[
-    {prenom:'Sylvain',nom:'Robesson',role:'manager'},
-    {prenom:'Pierre',nom:'Dunand',role:'collab'},
-    {prenom:'Nicolas',nom:'Pavan',role:'collab'},
-    {prenom:'Regis',nom:'Khediri',role:'collab'},
-    {prenom:'Valerie',nom:'Laforge',role:'collab'},
-    {prenom:'Sandrine',nom:'Dejarnac',role:'collab'},
-    {prenom:'Estelle',nom:'Quezel Ambrunaz',role:'collab'},
-    {prenom:'Yoann',nom:'Huguet',role:'collab'},
-    {prenom:'Alexia',nom:'Abadou',role:'collab'},
-    {prenom:'Anthony',nom:'Gaudfrin',role:'collab'},
-    {prenom:'Clea',nom:'Quantin',role:'collab'}
+    {matricule:3438,prenom:'Sylvain',nom:'Robesson',role:'manager'},
+    {matricule:2670,prenom:'Pierre',nom:'Dunand',role:'collab'},
+    {matricule:3375,prenom:'Nicolas',nom:'Pavan',role:'collab'},
+    {matricule:3457,prenom:'Regis',nom:'Khediri',role:'collab'},
+    {matricule:3462,prenom:'Valerie',nom:'Laforge',role:'collab'},
+    {matricule:3801,prenom:'Sandrine',nom:'Dejarnac',role:'collab'},
+    {matricule:4245,prenom:'Estelle',nom:'Quezel Ambrunaz',role:'collab'},
+    {matricule:4373,prenom:'Yoann',nom:'Huguet',role:'collab'},
+    {matricule:4676,prenom:'Alexia',nom:'Abadou',role:'collab'},
+    {matricule:4836,prenom:'Anthony',nom:'Gaudfrin',role:'collab'},
+    {matricule:5079,prenom:'Clea',nom:'Quantin',role:'collab'}
   ]},
   { code:'1018', name:'Marseille Rome', effectif:10, membres:[
-    {prenom:'Agathe',nom:'Klein',role:'manager'},
-    {prenom:'Daniel',nom:'Aiglin',role:'collab'},
-    {prenom:'Radjabou',nom:'Ahamada',role:'collab'},
-    {prenom:'Herve',nom:'Mallet',role:'collab'},
-    {prenom:'Sharon',nom:'Dray',role:'collab'},
-    {prenom:'Oriane',nom:'Picaud',role:'collab'},
-    {prenom:'Coraline',nom:'Bourgeois',role:'collab'},
-    {prenom:'Lea',nom:'Devico',role:'collab'},
-    {prenom:'Eros',nom:'Desanti',role:'collab'},
-    {prenom:'Liamine',nom:'Bekrar',role:'collab'}
+    {matricule:4947,prenom:'Agathe',nom:'Klein',role:'manager'},
+    {matricule:2376,prenom:'Daniel',nom:'Aiglin',role:'collab'},
+    {matricule:2070,prenom:'Radjabou',nom:'Ahamada',role:'collab'},
+    {matricule:2658,prenom:'Herve',nom:'Mallet',role:'collab'},
+    {matricule:4948,prenom:'Sharon',nom:'Dray',role:'collab'},
+    {matricule:5422,prenom:'Oriane',nom:'Picaud',role:'collab'},
+    {matricule:5592,prenom:'Coraline',nom:'Bourgeois',role:'collab'},
+    {matricule:5641,prenom:'Lea',nom:'Devico',role:'collab'},
+    {matricule:5667,prenom:'Eros',nom:'Desanti',role:'collab'},
+    {matricule:5710,prenom:'Liamine',nom:'Bekrar',role:'collab'}
   ]},
   { code:'1045', name:'Marseille Prado', effectif:7, membres:[
-    {prenom:'Sarah',nom:'Hamoud',role:'manager'},
-    {prenom:'Sephora',nom:'Benamara-Atlan',role:'collab'},
-    {prenom:'Theo',nom:'Fourmentez',role:'collab'},
-    {prenom:'Antoine',nom:'Jacotot',role:'collab'},
-    {prenom:'Chiara',nom:'Souza',role:'collab'},
-    {prenom:'Yudha',nom:'Lewers',role:'collab'},
-    {prenom:'Jean-Michel',nom:'Coppolani',role:'collab'}
+    {matricule:4774,prenom:'Sarah',nom:'Hamoud',role:'manager'},
+    {matricule:4898,prenom:'Sephora',nom:'Benamara-Atlan',role:'collab'},
+    {matricule:4903,prenom:'Theo',nom:'Fourmentez',role:'collab'},
+    {matricule:5178,prenom:'Antoine',nom:'Jacotot',role:'collab'},
+    {matricule:5179,prenom:'Chiara',nom:'Souza',role:'collab'},
+    {matricule:5645,prenom:'Yudha',nom:'Lewers',role:'collab'},
+    {matricule:5731,prenom:'Jean-Michel',nom:'Coppolani',role:'collab'}
   ]},
   { code:'1064', name:'Marseille La Valentine', effectif:8, membres:[
-    {prenom:'Virginia',nom:'Andre',role:'manager'},
-    {prenom:'Franck',nom:'Boada',role:'collab'},
-    {prenom:'Ophelie',nom:'Estoube',role:'collab'},
-    {prenom:'Mohamed',nom:'Djemya',role:'collab'},
-    {prenom:'Pol Antoine',nom:'Wirth',role:'collab'},
-    {prenom:'Marianna',nom:'Dou',role:'collab'},
-    {prenom:'Medina',nom:'Hamoud',role:'collab'},
-    {prenom:'Lola',nom:'Israel',role:'collab'}
+    {matricule:2744,prenom:'Virginia',nom:'Andre',role:'manager'},
+    {matricule:2425,prenom:'Franck',nom:'Boada',role:'collab'},
+    {matricule:2840,prenom:'Ophelie',nom:'Estoube',role:'collab'},
+    {matricule:2955,prenom:'Mohamed',nom:'Djemya',role:'collab'},
+    {matricule:4594,prenom:'Pol Antoine',nom:'Wirth',role:'collab'},
+    {matricule:5180,prenom:'Marianna',nom:'Dou',role:'collab'},
+    {matricule:5466,prenom:'Medina',nom:'Hamoud',role:'collab'},
+    {matricule:5495,prenom:'Lola',nom:'Israel',role:'collab'}
   ]},
   { code:'1062', name:'Vitrolles', effectif:6, membres:[
-    {prenom:'Jean Thomas',nom:'Antolini',role:'manager'},
-    {prenom:'Philippe',nom:'Autusse',role:'collab'},
-    {prenom:'Aurore',nom:'Lederle',role:'collab'},
-    {prenom:'Fabrice',nom:'Matos',role:'collab'},
-    {prenom:'Julia',nom:'Cohen',role:'collab'},
-    {prenom:'Matteo',nom:'Pazier',role:'collab'}
+    {matricule:3529,prenom:'Jean Thomas',nom:'Antolini',role:'manager'},
+    {matricule:2373,prenom:'Philippe',nom:'Autusse',role:'collab'},
+    {matricule:3630,prenom:'Aurore',nom:'Lederle',role:'collab'},
+    {matricule:4087,prenom:'Fabrice',nom:'Matos',role:'collab'},
+    {matricule:4904,prenom:'Julia',nom:'Cohen',role:'collab'},
+    {matricule:5547,prenom:'Matteo',nom:'Pazier',role:'collab'}
   ]},
   { code:'1077', name:'Grand Epagny', effectif:6, membres:[
-    {prenom:'Swani',nom:'Vincens De Tapol',role:'manager'},
-    {prenom:'Teina',nom:'Rainisio',role:'collab'},
-    {prenom:'Fanny',nom:'Hudry',role:'collab'},
-    {prenom:'Noelle',nom:'Bulloz',role:'collab'},
-    {prenom:'Laurene',nom:'Rachidi',role:'collab'},
-    {prenom:'Constance',nom:'Barrue',role:'collab'}
+    {matricule:4855,prenom:'Swani',nom:'Vincens De Tapol',role:'manager'},
+    {matricule:3777,prenom:'Teina',nom:'Rainisio',role:'collab'},
+    {matricule:4630,prenom:'Fanny',nom:'Hudry',role:'collab'},
+    {matricule:4647,prenom:'Noelle',nom:'Bulloz',role:'collab'},
+    {matricule:4986,prenom:'Laurene',nom:'Rachidi',role:'collab'},
+    {matricule:5777,prenom:'Constance',nom:'Barrue',role:'collab'}
   ]},
   { code:'1079', name:'Saint-Bonnet-de-Mure', effectif:5, membres:[
-    {prenom:'Benjamin',nom:'Beretvas',role:'manager'},
-    {prenom:'Angelique',nom:'Caillet',role:'collab'},
-    {prenom:'Philippe',nom:'Perrin',role:'collab'},
-    {prenom:'Stephane',nom:'Andre',role:'collab'},
-    {prenom:'Anne-Sophie',nom:'Durel',role:'collab'}
+    {matricule:2932,prenom:'Benjamin',nom:'Beretvas',role:'manager'},
+    {matricule:1126,prenom:'Angelique',nom:'Caillet',role:'collab'},
+    {matricule:3426,prenom:'Philippe',nom:'Perrin',role:'collab'},
+    {matricule:3766,prenom:'Stephane',nom:'Andre',role:'collab'},
+    {matricule:4727,prenom:'Anne-Sophie',nom:'Durel',role:'collab'}
   ]},
   { code:'1083', name:'Saint-Etienne Monthieu', effectif:5, membres:[
-    {prenom:'Marion',nom:'Bonnidal',role:'manager'},
-    {prenom:'Siham',nom:'El Madani',role:'collab'},
-    {prenom:'Louis Matthieu',nom:'Blachon',role:'collab'},
-    {prenom:'Julie',nom:'Matias Assuncao',role:'collab'},
-    {prenom:'Alix',nom:'Rouillard',role:'collab'}
+    {matricule:3275,prenom:'Marion',nom:'Bonnidal',role:'manager'},
+    {matricule:3030,prenom:'Siham',nom:'El Madani',role:'collab'},
+    {matricule:4703,prenom:'Louis Matthieu',nom:'Blachon',role:'collab'},
+    {matricule:4943,prenom:'Julie',nom:'Matias Assuncao',role:'collab'},
+    {matricule:5696,prenom:'Alix',nom:'Rouillard',role:'collab'}
   ]},
   { code:'1024', name:'Saint-Etienne', effectif:5, membres:[
-    {prenom:'Caroline',nom:'Lemaitre',role:'manager'},
-    {prenom:'Magali',nom:'Lucet',role:'collab'},
-    {prenom:'Anthony',nom:'Mounier',role:'collab'},
-    {prenom:'Audrey',nom:'Valla',role:'collab'},
-    {prenom:'David',nom:'Kadoche',role:'collab'}
+    {matricule:2447,prenom:'Caroline',nom:'Lemaitre',role:'manager'},
+    {matricule:3871,prenom:'Magali',nom:'Lucet',role:'collab'},
+    {matricule:3997,prenom:'Anthony',nom:'Mounier',role:'collab'},
+    {matricule:5202,prenom:'Audrey',nom:'Valla',role:'collab'},
+    {matricule:5739,prenom:'David',nom:'Kadoche',role:'collab'}
   ]}
 ];
 
-var CHALLENGES = [
-  'Pack Confort',
-  'Panier Moyen',
-  'Optical Prevoyance',
-  'Pack Confort valeur',
-  'PM Monture 1ere paire',
-  'Tests Auditifs',
-  'MDC',
-  'Taux de Concretisation',
-  'Lukkas'
-];
-
+var CHALLENGES = ['Pack Confort','Panier Moyen','Optical Prevoyance','Pack Confort valeur','PM Monture 1ere paire','Tests Auditifs','MDC','Taux de Concretisation','Lukkas'];
 var MOIS = ['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
-
 var responses = [];
 var selectedEmoji = '';
 var selectedChallenges = [];
 var modalRole = 'collab';
 var currentMembres = [];
+var SK = 'oc_points_v5';
 
-var SK = 'oc_points_v4';
-function saveData() {
-  try { localStorage.setItem(SK, JSON.stringify(responses)); } catch(e){}
-}
+function saveData() { try { localStorage.setItem(SK, JSON.stringify(responses)); } catch(e){} }
 function loadData() {
-  try {
-    var d = localStorage.getItem(SK);
-    if(d) responses = JSON.parse(d);
-  } catch(e){ responses = []; }
+  try { var d=localStorage.getItem(SK); if(d) responses=JSON.parse(d); } catch(e){ responses=[]; }
   renderAR();
 }
 
 function init() {
-  // Charger stores personnalises si existants
   try {
-    var custom = localStorage.getItem('oc_stores_custom');
-    if(custom) { var parsed = JSON.parse(custom); if(parsed&&parsed.length) { STORES.length=0; for(var x=0;x<parsed.length;x++) STORES.push(parsed[x]); } }
+    var custom = localStorage.getItem('oc_stores_v5');
+    if(custom) { var p=JSON.parse(custom); if(p&&p.length){ STORES.length=0; for(var x=0;x<p.length;x++) STORES.push(p[x]); } }
   } catch(e){}
 
   var now = new Date();
   document.getElementById('sel-mois').value = now.getMonth()+1;
 
-  var selF = document.getElementById('sel-magasin');
-  var selAR = document.getElementById('ar-magasin');
-  var selP = document.getElementById('param-magasin');
-  for(var i=0; i<STORES.length; i++) {
-    var s = STORES[i];
-    var mgr = null;
-    for(var j=0; j<s.membres.length; j++) { if(s.membres[j].role==='manager'){ mgr=s.membres[j]; break; } }
-    var label = s.name + (mgr ? ' - ' + mgr.prenom + ' ' + mgr.nom : '');
-    var opt1 = document.createElement('option'); opt1.value=s.code; opt1.textContent=label; selF.appendChild(opt1);
-    var opt2 = document.createElement('option'); opt2.value=s.code; opt2.textContent=s.name; selAR.appendChild(opt2);
-    var opt3 = document.createElement('option'); opt3.value=s.code; opt3.textContent=s.name; selP.appendChild(opt3);
+  var selF=document.getElementById('sel-magasin');
+  var selAR=document.getElementById('ar-magasin');
+  var selP=document.getElementById('param-magasin');
+  for(var i=0;i<STORES.length;i++) {
+    var s=STORES[i];
+    var mgr=null; for(var j=0;j<s.membres.length;j++){if(s.membres[j].role==='manager'){mgr=s.membres[j];break;}}
+    var label=s.name+(mgr?' - '+mgr.prenom+' '+mgr.nom:'');
+    var o1=document.createElement('option');o1.value=s.code;o1.textContent=label;selF.appendChild(o1);
+    var o2=document.createElement('option');o2.value=s.code;o2.textContent=s.name;selAR.appendChild(o2);
+    var o3=document.createElement('option');o3.value=s.code;o3.textContent=s.name;selP.appendChild(o3);
   }
 
-  var cl = document.getElementById('challenge-list');
-  for(var k=0; k<CHALLENGES.length; k++) {
-    (function(idx, label) {
-      var div = document.createElement('div');
-      div.className = 'challenge-item';
-      div.id = 'ch-' + idx;
-      div.innerHTML = '<div class="check" id="chk-' + idx + '"></div><div class="ch-text">' + label + '</div>';
-      div.addEventListener('click', function(){ toggleChallenge(idx); });
+  var cl=document.getElementById('challenge-list');
+  for(var k=0;k<CHALLENGES.length;k++) {
+    (function(idx,label){
+      var div=document.createElement('div');
+      div.className='challenge-item'; div.id='ch-'+idx;
+      div.innerHTML='<div class="check" id="chk-'+idx+'"></div><div class="ch-text">'+label+'</div>';
+      div.addEventListener('click',function(){toggleChallenge(idx);});
       cl.appendChild(div);
-    })(k, CHALLENGES[k]);
+    })(k,CHALLENGES[k]);
   }
-
   loadData();
 }
 
-function switchTab(tab, btn) {
-  var views = document.querySelectorAll('.view');
-  for(var i=0; i<views.length; i++) views[i].classList.remove('active');
-  var tabs = document.querySelectorAll('.tab-btn');
-  for(var j=0; j<tabs.length; j++) tabs[j].classList.remove('active');
+function switchTab(tab,btn) {
+  var vs=document.querySelectorAll('.view'); for(var i=0;i<vs.length;i++) vs[i].classList.remove('active');
+  var bs=document.querySelectorAll('.tab-btn'); for(var j=0;j<bs.length;j++) bs[j].classList.remove('active');
   document.getElementById('view-'+tab).classList.add('active');
   btn.classList.add('active');
   if(tab==='ar') renderAR();
 }
 
+function getStore(code) { for(var i=0;i<STORES.length;i++){if(STORES[i].code===code) return STORES[i];} return null; }
+
 function onMagasinChange() {
-  var code = document.getElementById('sel-magasin').value;
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  var cont = document.getElementById('obj-container');
-  if(!store) {
-    cont.innerHTML = '<p style="color:var(--texte-dim);font-size:14px">Selectionnez votre magasin</p>';
+  var code=document.getElementById('sel-magasin').value;
+  var store=getStore(code);
+  var cont=document.getElementById('obj-container');
+  if(!store){
+    cont.innerHTML='<p style="color:var(--texte-dim);font-size:14px">Selectionnez votre magasin</p>';
     document.getElementById('budget-total-display').textContent='—';
     document.getElementById('budget-effectif-txt').textContent='effectif';
     document.getElementById('budget-deja-input').value=0;
@@ -584,190 +563,162 @@ function onMagasinChange() {
     document.getElementById('budget-slider-max').textContent='—';
     return;
   }
-  currentMembres = [];
-  for(var j=0; j<store.membres.length; j++) currentMembres.push({prenom:store.membres[j].prenom, nom:store.membres[j].nom, role:store.membres[j].role});
-  var max = store.effectif * 30;
-  var sl = document.getElementById('budget-mois-slider');
-  sl.max = max; sl.value = 0; sl.style.setProperty('--pct','0%');
-  document.getElementById('budget-slider-max').textContent = max + ' EUR';
-  document.getElementById('budget-total-display').textContent = max + ' EUR';
-  document.getElementById('budget-effectif-txt').textContent = store.effectif + ' collaborateurs';
-  document.getElementById('budget-deja-input').value = 0;
-  updateBudget();
-  renderObjectifs();
+  currentMembres=[];
+  for(var j=0;j<store.membres.length;j++) currentMembres.push({matricule:store.membres[j].matricule,prenom:store.membres[j].prenom,nom:store.membres[j].nom,role:store.membres[j].role});
+  var max=store.effectif*30;
+  var sl=document.getElementById('budget-mois-slider');
+  sl.max=max; sl.value=0; sl.style.setProperty('--pct','0%');
+  document.getElementById('budget-slider-max').textContent=max+' EUR';
+  document.getElementById('budget-total-display').textContent=max+' EUR';
+  document.getElementById('budget-effectif-txt').textContent=store.effectif+' collaborateurs';
+  document.getElementById('budget-deja-input').value=0;
+  updateBudget(); renderObjectifs();
 }
 
 function updateBudget() {
-  var code = document.getElementById('sel-magasin').value;
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  var max = store ? store.effectif*30 : 0;
-  var deja = parseInt(document.getElementById('budget-deja-input').value) || 0;
-  var sl = document.getElementById('budget-mois-slider');
-  var newMax = Math.max(0, max-deja);
-  if(parseInt(sl.max) !== newMax) { sl.max = newMax; if(parseInt(sl.value) > newMax) sl.value = newMax; }
-  var mois = parseInt(sl.value) || 0;
-  var cumul = deja + mois;
-  var reste = Math.max(0, max - cumul);
-  var pct = newMax > 0 ? Math.min(100, mois/newMax*100) : 0;
-  sl.style.setProperty('--pct', pct+'%');
-  document.getElementById('budget-slider-max').textContent = newMax + ' EUR';
-  document.getElementById('budget-mois-display').textContent = mois + ' EUR';
-  document.getElementById('budget-cumul-display').textContent = cumul + ' EUR';
-  document.getElementById('budget-reste-display').textContent = max > 0 ? reste + ' EUR' : '— EUR';
+  var code=document.getElementById('sel-magasin').value;
+  var store=getStore(code);
+  var max=store?store.effectif*30:0;
+  var deja=parseInt(document.getElementById('budget-deja-input').value)||0;
+  var sl=document.getElementById('budget-mois-slider');
+  var newMax=Math.max(0,max-deja);
+  if(parseInt(sl.max)!==newMax){sl.max=newMax;if(parseInt(sl.value)>newMax)sl.value=newMax;}
+  var mois=parseInt(sl.value)||0;
+  var cumul=deja+mois;
+  var pct=newMax>0?Math.min(100,mois/newMax*100):0;
+  sl.style.setProperty('--pct',pct+'%');
+  document.getElementById('budget-slider-max').textContent=newMax+' EUR';
+  document.getElementById('budget-mois-display').textContent=mois+' EUR';
+  document.getElementById('budget-cumul-display').textContent=cumul+' EUR';
+  document.getElementById('budget-reste-display').textContent=max>0?Math.max(0,max-cumul)+' EUR':'— EUR';
 }
 
 function renderObjectifs() {
-  var cont = document.getElementById('obj-container');
-  var html = '';
-  var mgrs = [], cols = [];
-  for(var i=0; i<currentMembres.length; i++) {
-    if(currentMembres[i].role==='manager') mgrs.push(currentMembres[i]);
-    else cols.push(currentMembres[i]);
-  }
-  if(mgrs.length) {
-    html += '<div class="obj-section-title"><span class="role-badge role-manager">Manager</span></div>';
-    for(var a=0; a<mgrs.length; a++) {
-      html += '<div class="obj-row"><div class="obj-name">'+mgrs[a].prenom+' '+mgrs[a].nom+'</div>' +
-              '<div class="obj-input-wrap"><input type="number" id="obj_mgr_'+a+'" placeholder="0" min="0" step="100"></div></div>';
+  var cont=document.getElementById('obj-container');
+  var html='';
+  var mgrs=[],cols=[];
+  for(var i=0;i<currentMembres.length;i++){if(currentMembres[i].role==='manager') mgrs.push(currentMembres[i]); else cols.push(currentMembres[i]);}
+  if(mgrs.length){
+    html+='<div class="obj-section-title"><span class="role-badge role-manager">Manager</span></div>';
+    for(var a=0;a<mgrs.length;a++){
+      html+='<div class="obj-row"><div class="obj-name">'+mgrs[a].prenom+' '+mgrs[a].nom+'</div>'+
+            '<div class="obj-mat">'+mgrs[a].matricule+'</div>'+
+            '<div class="obj-input-wrap"><input type="number" id="obj_mgr_'+a+'" placeholder="0" min="0" step="100"></div></div>';
     }
   }
-  if(cols.length) {
-    html += '<div class="obj-section-title"><span class="role-badge role-collab">Collaborateurs</span></div>';
-    for(var b=0; b<cols.length; b++) {
-      html += '<div class="obj-row"><div class="obj-name">'+cols[b].prenom+' '+cols[b].nom+'</div>' +
-              '<div class="obj-input-wrap"><input type="number" id="obj_col_'+b+'" placeholder="0" min="0" step="100"></div></div>';
+  if(cols.length){
+    html+='<div class="obj-section-title"><span class="role-badge role-collab">Collaborateurs</span></div>';
+    for(var b=0;b<cols.length;b++){
+      html+='<div class="obj-row"><div class="obj-name">'+cols[b].prenom+' '+cols[b].nom+'</div>'+
+            '<div class="obj-mat">'+cols[b].matricule+'</div>'+
+            '<div class="obj-input-wrap"><input type="number" id="obj_col_'+b+'" placeholder="0" min="0" step="100"></div></div>';
     }
   }
-  html += '<button class="add-person-btn" onclick="openModal()">+ Ajouter un collaborateur</button>';
-  cont.innerHTML = html;
+  html+='<button class="add-person-btn" onclick="openModal()">+ Ajouter un collaborateur</button>';
+  cont.innerHTML=html;
 }
 
 function getObjectifs() {
-  var result = [];
-  var mgrs = [], cols = [];
-  for(var i=0; i<currentMembres.length; i++) {
-    if(currentMembres[i].role==='manager') mgrs.push(currentMembres[i]);
-    else cols.push(currentMembres[i]);
-  }
-  for(var a=0; a<mgrs.length; a++) {
-    var el = document.getElementById('obj_mgr_'+a);
-    result.push({prenom:mgrs[a].prenom, nom:mgrs[a].nom, role:'manager', objectif: el ? (parseFloat(el.value)||0) : 0});
-  }
-  for(var b=0; b<cols.length; b++) {
-    var el2 = document.getElementById('obj_col_'+b);
-    result.push({prenom:cols[b].prenom, nom:cols[b].nom, role:'collab', objectif: el2 ? (parseFloat(el2.value)||0) : 0});
-  }
+  var result=[];
+  var mgrs=[],cols=[];
+  for(var i=0;i<currentMembres.length;i++){if(currentMembres[i].role==='manager') mgrs.push(currentMembres[i]); else cols.push(currentMembres[i]);}
+  for(var a=0;a<mgrs.length;a++){var el=document.getElementById('obj_mgr_'+a);result.push({matricule:mgrs[a].matricule,prenom:mgrs[a].prenom,nom:mgrs[a].nom,role:'manager',objectif:el?(parseFloat(el.value)||0):0});}
+  for(var b=0;b<cols.length;b++){var el2=document.getElementById('obj_col_'+b);result.push({matricule:cols[b].matricule,prenom:cols[b].prenom,nom:cols[b].nom,role:'collab',objectif:el2?(parseFloat(el2.value)||0):0});}
   return result;
 }
 
 function openModal() {
   document.getElementById('modal-prenom').value='';
   document.getElementById('modal-nom').value='';
+  document.getElementById('modal-matricule').value='';
   modalRole='collab';
-  var btns = document.querySelectorAll('.role-btn');
-  for(var i=0; i<btns.length; i++) btns[i].className='role-btn';
+  var bs=document.querySelectorAll('.role-btn');for(var i=0;i<bs.length;i++)bs[i].className='role-btn';
   document.getElementById('rb-collab').className='role-btn sel-collab';
   document.getElementById('modal-overlay').classList.add('open');
 }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function closeModalOutside(e) { if(e.target===document.getElementById('modal-overlay')) closeModal(); }
-function selectRole(role) {
-  modalRole = role;
-  var btns = document.querySelectorAll('.role-btn');
-  for(var i=0; i<btns.length; i++) btns[i].className='role-btn';
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+function selectRole(role){
+  modalRole=role;
+  var bs=document.querySelectorAll('.role-btn');for(var i=0;i<bs.length;i++)bs[i].className='role-btn';
   document.getElementById('rb-'+role).className='role-btn sel-'+role;
 }
-function confirmAddPerson() {
-  var prenom = document.getElementById('modal-prenom').value.trim();
-  var nom = document.getElementById('modal-nom').value.trim();
-  if(!prenom && !nom){ alert('Saisir au moins un prenom ou un nom.'); return; }
-  currentMembres.push({prenom:prenom, nom:nom, role:modalRole});
-  closeModal();
-  renderObjectifs();
+function confirmAddPerson(){
+  var prenom=document.getElementById('modal-prenom').value.trim();
+  var nom=document.getElementById('modal-nom').value.trim();
+  var mat=document.getElementById('modal-matricule').value.trim();
+  if(!prenom&&!nom){alert('Saisir au moins un prenom ou un nom.');return;}
+  currentMembres.push({matricule:mat||'',prenom:prenom,nom:nom,role:modalRole});
+  closeModal(); renderObjectifs();
 }
 
-function selectEmoji(btn) {
-  var btns = document.querySelectorAll('.emoji-btn');
-  for(var i=0; i<btns.length; i++) btns[i].classList.remove('selected');
-  btn.classList.add('selected');
-  selectedEmoji = btn.dataset.val;
+function selectEmoji(btn){
+  var bs=document.querySelectorAll('.emoji-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('selected');
+  btn.classList.add('selected'); selectedEmoji=btn.dataset.val;
 }
 
-function toggleChallenge(i) {
-  var label = CHALLENGES[i];
-  var el = document.getElementById('ch-'+i);
-  var idx = selectedChallenges.indexOf(label);
-  if(idx===-1){ selectedChallenges.push(label); el.classList.add('selected'); }
-  else { selectedChallenges.splice(idx,1); el.classList.remove('selected'); }
+function toggleChallenge(i){
+  var label=CHALLENGES[i];
+  var el=document.getElementById('ch-'+i);
+  var idx=selectedChallenges.indexOf(label);
+  if(idx===-1){selectedChallenges.push(label);el.classList.add('selected');}
+  else{selectedChallenges.splice(idx,1);el.classList.remove('selected');}
 }
 
-function submitForm() {
-  var code = document.getElementById('sel-magasin').value;
-  if(!code){ alert('Selectionnez votre magasin.'); return; }
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  var mois = parseInt(document.getElementById('sel-mois').value);
-  var annee = parseInt(document.getElementById('sel-annee').value);
-  var deja = parseInt(document.getElementById('budget-deja-input').value)||0;
-  var moisB = parseInt(document.getElementById('budget-mois-slider').value)||0;
-  var objs = getObjectifs();
-  var humeurTexte = document.getElementById('txt-humeur').value.trim();
-  var actionCA = document.getElementById('txt-action-ca').value.trim();
-  var audio = parseFloat(document.getElementById('prevision-audio').value)||0;
-  var aide = document.getElementById('txt-aide').value.trim();
+function submitForm(){
+  var code=document.getElementById('sel-magasin').value;
+  if(!code){alert('Selectionnez votre magasin.');return;}
+  var store=getStore(code);
+  var mois=parseInt(document.getElementById('sel-mois').value);
+  var annee=parseInt(document.getElementById('sel-annee').value);
+  var deja=parseInt(document.getElementById('budget-deja-input').value)||0;
+  var moisB=parseInt(document.getElementById('budget-mois-slider').value)||0;
+  var objs=getObjectifs();
+  var humeurTexte=document.getElementById('txt-humeur').value.trim();
+  var actionCA=document.getElementById('txt-action-ca').value.trim();
+  var audio=parseFloat(document.getElementById('prevision-audio').value)||0;
+  var aide=document.getElementById('txt-aide').value.trim();
 
-  // Generer CSV
-  var headers = ['Magasin','Mois','Annee','Date','Humeur','Bilan humeur','Budget deja','Budget mois','Budget cumul','Budget max','Budget pct','Action CA','Prev Audio','Objectifs','Aide','Challenges'];
-  var objStr = '';
-  for(var j=0; j<objs.length; j++) {
-    if(objs[j].objectif>0) {
-      if(objStr) objStr += ' | ';
-      objStr += objs[j].prenom+' '+objs[j].nom+'('+objs[j].role+'):'+objs[j].objectif+'EUR';
+  // CSV synthese
+  var headers=['Magasin','Mois','Annee','Date','Humeur','Bilan humeur','Budget deja','Budget mois','Budget cumul','Budget max','Budget pct','Action CA','Prev Audio','Aide','Challenges'];
+  var row=[store.name,MOIS[mois],annee,new Date().toLocaleDateString('fr-FR'),selectedEmoji,humeurTexte.replace(/\n/g,' '),deja,moisB,deja+moisB,store.effectif*30,Math.round((deja+moisB)/(store.effectif*30)*100)+'%',actionCA.replace(/\n/g,' '),audio,aide.replace(/\n/g,' '),selectedChallenges.join(' | ')];
+
+  // CSV objectifs (colonnes supplementaires)
+  var objStr='';
+  for(var j=0;j<objs.length;j++){
+    if(objs[j].objectif>0){
+      if(objStr) objStr+=' | ';
+      objStr+=objs[j].matricule+'|'+objs[j].prenom+'|'+objs[j].nom+'|'+objs[j].objectif;
     }
   }
-  var row = [
-    store.name, MOIS[mois], annee, new Date().toLocaleDateString('fr-FR'),
-    selectedEmoji, humeurTexte.replace(/\n/g,' '),
-    deja, moisB, deja+moisB, store.effectif*30,
-    Math.round((deja+moisB)/(store.effectif*30)*100)+'%',
-    actionCA.replace(/\n/g,' '), audio, objStr,
-    aide.replace(/\n/g,' '), selectedChallenges.join(' | ')
-  ];
-  var csvLines = [headers, row].map(function(r){
-    return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(';');
-  });
-  var csv = csvLines.join('\n');
-  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  var fname = 'Point_'+store.name.replace(/[^a-zA-Z0-9]/g,'_')+'_'+MOIS[mois]+'_'+annee+'.csv';
-  a.href=url; a.download=fname; a.click();
-  URL.revokeObjectURL(url);
+  row.push(objStr);
+  headers.push('Objectifs(mat|prenom|nom|val)');
 
-  // Email pre-rempli
-  var body = 'Bonjour Cyril,\n\nVoici mon point mensuel pour ' + MOIS[mois] + ' ' + annee + '.\n\n'
-    + 'MAGASIN : ' + store.name + '\n\n'
-    + 'HUMEUR : ' + selectedEmoji + ' ' + (humeurTexte||'Non renseigne') + '\n\n'
-    + 'BUDGET :\nDeja utilise : ' + deja + ' EUR\nCe mois : ' + moisB + ' EUR\nTotal : ' + (deja+moisB) + ' EUR / ' + (store.effectif*30) + ' EUR\n\n'
-    + 'ACTION CA :\n' + (actionCA||'Non renseigne') + '\n\n'
-    + 'PREVISIONNEL AUDIO : ' + audio + ' EUR\n\n'
-    + 'OBJECTIFS INDIVIDUELS :\n' + (objStr.replace(/ \| /g,'\n')||'Non renseigne') + '\n\n'
-    + 'AIDE ATTENDUE :\n' + (aide||'Non renseigne') + '\n\n'
-    + 'CHALLENGES : ' + (selectedChallenges.join(', ')||'Non renseigne') + '\n\n'
-    + '⚠️ N\'OUBLIEZ PAS de joindre le fichier CSV telecharge avant d\'envoyer.\n\nCordialement';
+  var csv=[headers,row].map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='Point_'+store.name.replace(/[^a-zA-Z0-9]/g,'_')+'_'+MOIS[mois]+'_'+annee+'.csv';
+  a.click(); URL.revokeObjectURL(url);
 
-  var subject = encodeURIComponent('Point mensuel ' + store.name + ' - ' + MOIS[mois] + ' ' + annee);
+  var bodyEmail='Bonjour Cyril,\n\nVoici mon point mensuel pour '+MOIS[mois]+' '+annee+'.\n\n'
+    +'MAGASIN : '+store.name+'\nHUMEUR : '+selectedEmoji+' '+(humeurTexte||'Non renseigne')+'\n\n'
+    +'BUDGET :\nDeja utilise : '+deja+' EUR\nCe mois : '+moisB+' EUR\nTotal : '+(deja+moisB)+' EUR / '+(store.effectif*30)+' EUR\n\n'
+    +'ACTION CA :\n'+(actionCA||'Non renseigne')+'\n\nPREVISIONNEL AUDIO : '+audio+' EUR\n\n'
+    +'AIDE ATTENDUE :\n'+(aide||'Non renseigne')+'\n\nCHALLENGES : '+(selectedChallenges.join(', ')||'Non renseigne')+'\n\n'
+    +'[Le fichier CSV avec les objectifs individuels est joint]\n\nCordialement';
+
+  var subject=encodeURIComponent('Point mensuel '+store.name+' - '+MOIS[mois]+' '+annee);
   setTimeout(function(){
-    alert('✅ Etape 1 sur 2 : votre CSV est telecharge dans vos fichiers.\n\n📧 Etape 2 sur 2 : l\'email va s\'ouvrir.\nPensez a joindre le fichier CSV avant d\'appuyer sur Envoyer !');
-    window.location.href = 'mailto:cyril.gauthier@optical-center.com?subject=' + subject + '&body=' + encodeURIComponent(body);
-  }, 600);
+    alert('Etape 1 : votre CSV est telecharge.\nEtape 2 : l\'email va s\'ouvrir.\nPensez a joindre le fichier CSV avant d\'envoyer !');
+    window.location.href='mailto:cyril.gauthier@optical-center.com?subject='+subject+'&body='+encodeURIComponent(bodyEmail);
+  },600);
 
-  showToast('CSV telecharge - pensez a le joindre!');
+  showToast('CSV telecharge - pensez a le joindre !');
   resetForm();
 }
 
-function resetForm() {
+function resetForm(){
   document.getElementById('sel-magasin').value='';
   document.getElementById('txt-humeur').value='';
   document.getElementById('txt-action-ca').value='';
@@ -780,290 +731,260 @@ function resetForm() {
   document.getElementById('budget-cumul-display').textContent='0 EUR';
   document.getElementById('budget-reste-display').textContent='— EUR';
   selectedEmoji=''; selectedChallenges=[]; currentMembres=[];
-  var ebtns = document.querySelectorAll('.emoji-btn');
-  for(var i=0; i<ebtns.length; i++) ebtns[i].classList.remove('selected');
-  var citems = document.querySelectorAll('.challenge-item');
-  for(var j=0; j<citems.length; j++) citems[j].classList.remove('selected');
+  var eb=document.querySelectorAll('.emoji-btn');for(var i=0;i<eb.length;i++)eb[i].classList.remove('selected');
+  var ci=document.querySelectorAll('.challenge-item');for(var j=0;j<ci.length;j++)ci[j].classList.remove('selected');
   document.getElementById('obj-container').innerHTML='<p style="color:var(--texte-dim);font-size:14px">Selectionnez votre magasin</p>';
 }
 
 // IMPORT CSV
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  handleFiles(e.dataTransfer.files);
-}
-
-function handleFiles(files) {
-  var count = 0;
-  var total = files.length;
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');handleFiles(e.dataTransfer.files);}
+function handleFiles(files){
+  var count=0,total=files.length;
   if(!total) return;
-  for(var i=0; i<total; i++) {
-    (function(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var imported = parseCSV(e.target.result);
-        for(var k=0; k<imported.length; k++) {
-          var r = imported[k];
-          var exists = false;
-          for(var m=0; m<responses.length; m++) {
-            if(responses[m].magasin===r.magasin && responses[m].mois===r.mois && responses[m].annee===r.annee) { exists=true; break; }
-          }
+  for(var i=0;i<total;i++){
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var imported=parseCSV(e.target.result);
+        for(var k=0;k<imported.length;k++){
+          var r=imported[k],exists=false;
+          for(var m=0;m<responses.length;m++){if(responses[m].magasin===r.magasin&&responses[m].mois===r.mois&&responses[m].annee===r.annee){exists=true;break;}}
           if(!exists) responses.push(r);
         }
         count++;
-        if(count===total) {
-          saveData();
-          renderAR();
-          document.getElementById('import-status').textContent = count + ' fichier(s) importe(s) - ' + responses.length + ' reponse(s) au total';
-          setTimeout(function(){ document.getElementById('import-status').textContent=''; }, 3000);
+        if(count===total){
+          saveData(); renderAR();
+          document.getElementById('import-status').textContent=count+' fichier(s) importe(s) - '+responses.length+' reponse(s)';
+          setTimeout(function(){document.getElementById('import-status').textContent='';},3000);
         }
       };
-      reader.readAsText(file, 'UTF-8');
+      reader.readAsText(file,'UTF-8');
     })(files[i]);
   }
 }
 
-function parseCSV(text) {
-  text = text.replace(/^\uFEFF/, '');
-  var lines = text.split('\n');
-  var result = [];
-  for(var i=1; i<lines.length; i++) {
-    var line = lines[i].trim();
-    if(!line) continue;
-    var cols = splitCSVLine(line);
-    if(cols.length < 16) continue;
-    var moisIdx = MOIS.indexOf(cols[1]);
-    result.push({
-      id: Date.now()+i+Math.random(),
-      date: new Date().toISOString(),
-      magasin: cols[0], mois: moisIdx>0?moisIdx:1,
-      annee: parseInt(cols[2])||2026,
-      humeurEmoji: cols[4], humeurTexte: cols[5],
-      budgetDeja: parseFloat(cols[6])||0,
-      budgetMois: parseFloat(cols[7])||0,
-      budgetCumul: parseFloat(cols[8])||0,
-      budgetMax: parseFloat(cols[9])||0,
-      actionCA: cols[11],
-      previsionAudio: parseFloat(cols[12])||0,
-      objectifs: [], aide: cols[14],
-      challenges: cols[15] ? cols[15].split(' | ') : [],
-      code: ''
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  var lines=text.split('\n'),result=[];
+  for(var i=1;i<lines.length;i++){
+    var line=lines[i].trim();if(!line) continue;
+    var cols=splitCSVLine(line);if(cols.length<15) continue;
+    var moisIdx=MOIS.indexOf(cols[1]);
+    // Parser objectifs : col 15 = matricule|prenom|nom|val | ...
+    var objs=[];
+    if(cols[15]){
+      var parts=cols[15].split(' | ');
+      for(var p=0;p<parts.length;p++){
+        var seg=parts[p].split('|');
+        if(seg.length===4) objs.push({matricule:seg[0],prenom:seg[1],nom:seg[2],objectif:parseFloat(seg[3])||0});
+      }
+    }
+    result.push({id:Date.now()+i+Math.random(),date:new Date().toISOString(),
+      magasin:cols[0],mois:moisIdx>0?moisIdx:1,annee:parseInt(cols[2])||2026,
+      humeurEmoji:cols[4],humeurTexte:cols[5],
+      budgetDeja:parseFloat(cols[6])||0,budgetMois:parseFloat(cols[7])||0,
+      budgetCumul:parseFloat(cols[8])||0,budgetMax:parseFloat(cols[9])||0,
+      actionCA:cols[11],previsionAudio:parseFloat(cols[12])||0,
+      aide:cols[13],challenges:cols[14]?cols[14].split(' | '):[],
+      objectifs:objs
     });
   }
   return result;
 }
 
-function splitCSVLine(line) {
-  var result=[], cur='', inQ=false;
-  for(var i=0; i<line.length; i++) {
+function splitCSVLine(line){
+  var result=[],cur='',inQ=false;
+  for(var i=0;i<line.length;i++){
     var c=line[i];
-    if(c==='"'){ if(inQ && line[i+1]==='"'){ cur+='"'; i++; } else inQ=!inQ; }
-    else if(c===';' && !inQ){ result.push(cur); cur=''; }
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===';'&&!inQ){result.push(cur);cur='';}
     else cur+=c;
   }
-  result.push(cur);
-  return result;
+  result.push(cur);return result;
 }
 
-function clearAll() {
-  if(!confirm('Vider toutes les reponses importees ?')) return;
-  responses = [];
-  saveData();
-  renderAR();
-}
+function clearAll(){if(!confirm('Vider toutes les reponses ?')) return; responses=[];saveData();renderAR();}
 
 // VUE AR
-function filterResponses() {
-  var mois = document.getElementById('ar-mois').value;
-  var annee = document.getElementById('ar-annee').value;
-  var mag = document.getElementById('ar-magasin').value;
-  var result = [];
-  for(var i=0; i<responses.length; i++) {
-    var r = responses[i];
-    if(mois && r.mois != mois) continue;
-    if(annee && r.annee != annee) continue;
-    if(mag && r.magasin !== STORES.filter(function(s){ return s.code===mag; }).map(function(s){ return s.name; })[0]) continue;
+function filterResponses(){
+  var mois=document.getElementById('ar-mois').value;
+  var annee=document.getElementById('ar-annee').value;
+  var mag=document.getElementById('ar-magasin').value;
+  var result=[];
+  for(var i=0;i<responses.length;i++){
+    var r=responses[i];
+    if(mois&&r.mois!=mois) continue;
+    if(annee&&r.annee!=annee) continue;
+    if(mag){var sn=getStore(mag);if(sn&&r.magasin!==sn.name) continue;}
     result.push(r);
   }
-  result.sort(function(a,b){ return b.id-a.id; });
+  result.sort(function(a,b){return b.id-a.id;});
   return result;
 }
 
-function renderAR() {
-  var tabAR = document.getElementById('tab-ar');
-  tabAR.innerHTML = 'Vue AR' + (responses.length>0 ? '<span class="responses-count">'+responses.length+'</span>' : '');
-  var filtered = filterResponses();
-  var sw = document.getElementById('ar-stats-wrap');
-  var rc = document.getElementById('ar-responses');
-  if(!filtered.length) {
-    sw.innerHTML='';
-    rc.innerHTML='<div class="empty-state"><div class="e-icon">📭</div><div>Aucune reponse - importez des CSV</div></div>';
-    return;
+function renderAR(){
+  var tabAR=document.getElementById('tab-ar');
+  tabAR.innerHTML='Vue AR'+(responses.length>0?'<span class="responses-count">'+responses.length+'</span>':'');
+  var filtered=filterResponses();
+  var sw=document.getElementById('ar-stats-wrap'),rc=document.getElementById('ar-responses');
+  if(!filtered.length){sw.innerHTML='';rc.innerHTML='<div class="empty-state"><div class="e-icon">📭</div><div>Aucune reponse - importez des CSV</div></div>';return;}
+  var totalAudio=0,budgetSum=0,cc={};
+  for(var i=0;i<filtered.length;i++){
+    totalAudio+=filtered[i].previsionAudio||0;
+    budgetSum+=filtered[i].budgetMax>0?(filtered[i].budgetCumul||0)/filtered[i].budgetMax*100:0;
+    var chs=filtered[i].challenges||[];for(var j=0;j<chs.length;j++){cc[chs[j]]=(cc[chs[j]]||0)+1;}
   }
-  var totalAudio=0, budgetSum=0;
-  var cc={};
-  for(var i=0; i<filtered.length; i++) {
-    totalAudio += filtered[i].previsionAudio||0;
-    budgetSum += filtered[i].budgetMax>0 ? (filtered[i].budgetCumul||0)/filtered[i].budgetMax*100 : 0;
-    var chs = filtered[i].challenges||[];
-    for(var j=0; j<chs.length; j++) { cc[chs[j]]=(cc[chs[j]]||0)+1; }
-  }
-  var budgetPct = Math.round(budgetSum/filtered.length);
-  var topC = null, topN = 0;
-  for(var k in cc) { if(cc[k]>topN){ topN=cc[k]; topC=k; } }
-
-  sw.innerHTML = '<div class="stat-grid">' +
-    '<div class="stat-card"><div class="s-label">Reponses</div><div class="s-value">'+filtered.length+'<span style="font-size:13px;color:var(--texte-dim)"> / '+STORES.length+'</span></div></div>' +
-    '<div class="stat-card"><div class="s-label">Prev. Audio total</div><div class="s-value small">'+totalAudio.toLocaleString('fr-FR')+' EUR</div></div>' +
-    '<div class="stat-card"><div class="s-label">Budget moy.</div><div class="s-value">'+budgetPct+'%</div></div>' +
-    '<div class="stat-card"><div class="s-label">Top challenge</div><div class="s-value small">'+(topC||'—')+'</div></div>' +
+  var topC=null,topN=0;for(var k in cc){if(cc[k]>topN){topN=cc[k];topC=k;}}
+  sw.innerHTML='<div class="stat-grid">'+
+    '<div class="stat-card"><div class="s-label">Reponses</div><div class="s-value">'+filtered.length+'<span style="font-size:13px;color:var(--texte-dim)"> / '+STORES.length+'</span></div></div>'+
+    '<div class="stat-card"><div class="s-label">Prev. Audio total</div><div class="s-value small">'+totalAudio.toLocaleString('fr-FR')+' EUR</div></div>'+
+    '<div class="stat-card"><div class="s-label">Budget moy.</div><div class="s-value">'+Math.round(budgetSum/filtered.length)+'%</div></div>'+
+    '<div class="stat-card"><div class="s-label">Top challenge</div><div class="s-value small">'+(topC||'—')+'</div></div>'+
     '</div>';
-
-  var html = '';
-  for(var n=0; n<filtered.length; n++) {
-    var r = filtered[n];
-    var budPct = r.budgetMax>0 ? Math.round((r.budgetCumul||0)/r.budgetMax*100) : 0;
-    html += '<div class="response-card">' +
-      '<div class="rc-header"><div>' +
-      '<div class="rc-store">'+r.magasin+'</div>' +
-      '<div class="rc-meta"><span class="mois-badge">'+MOIS[r.mois]+' '+r.annee+'</span></div>' +
-      '</div><button class="delete-btn" onclick="deleteResp('+r.id+')">x</button></div>';
-    if(r.humeurEmoji||r.humeurTexte) {
-      html += '<div class="rc-section"><div class="rc-section-label">Humeur</div><div class="rc-value">'+r.humeurEmoji+' '+(r.humeurTexte||'')+'</div></div>';
+  var html='';
+  for(var n=0;n<filtered.length;n++){
+    var r=filtered[n];
+    var bp=r.budgetMax>0?Math.round((r.budgetCumul||0)/r.budgetMax*100):0;
+    html+='<div class="response-card">'+
+      '<div class="rc-header"><div><div class="rc-store">'+r.magasin+'</div>'+
+      '<div class="rc-meta"><span class="mois-badge">'+MOIS[r.mois]+' '+r.annee+'</span></div></div>'+
+      '<button class="delete-btn" onclick="deleteResp('+r.id+')">x</button></div>';
+    if(r.humeurEmoji||r.humeurTexte) html+='<div class="rc-section"><div class="rc-section-label">Humeur</div><div class="rc-value">'+r.humeurEmoji+' '+(r.humeurTexte||'')+'</div></div>';
+    html+='<div class="rc-section"><div class="rc-section-label">Budget</div><div class="rc-value">Deja: <strong>'+(r.budgetDeja||0)+' EUR</strong> + Ce mois: <strong style="color:var(--or)">'+(r.budgetMois||0)+' EUR</strong> = <strong style="color:var(--or)">'+(r.budgetCumul||0)+' EUR</strong> / '+(r.budgetMax||0)+' EUR ('+bp+'%)</div></div>';
+    if(r.actionCA) html+='<div class="rc-section"><div class="rc-section-label">Action CA</div><div class="rc-value">'+r.actionCA+'</div></div>';
+    if(r.previsionAudio) html+='<div class="rc-section"><div class="rc-section-label">Prev. Audio</div><div class="rc-value"><strong style="color:var(--audio-color)">'+(r.previsionAudio||0).toLocaleString('fr-FR')+' EUR</strong></div></div>';
+    if(r.objectifs&&r.objectifs.length){
+      var ot='';for(var p=0;p<r.objectifs.length;p++){var o=r.objectifs[p];if(o.objectif>0) ot+='<span class="obj-tag">'+o.prenom+' '+o.nom+' ('+o.matricule+') : '+(o.objectif||0).toLocaleString('fr-FR')+' EUR</span>';}
+      if(ot) html+='<div class="rc-section"><div class="rc-section-label">Objectifs</div><div class="rc-value">'+ot+'</div></div>';
     }
-    html += '<div class="rc-section"><div class="rc-section-label">Budget</div><div class="rc-value">Deja: <strong>'+(r.budgetDeja||0)+' EUR</strong> + Ce mois: <strong style="color:var(--or)">'+(r.budgetMois||0)+' EUR</strong> = <strong style="color:var(--or)">'+(r.budgetCumul||0)+' EUR</strong> / '+(r.budgetMax||0)+' EUR ('+budPct+'%)</div></div>';
-    if(r.actionCA) html += '<div class="rc-section"><div class="rc-section-label">Action CA</div><div class="rc-value">'+r.actionCA+'</div></div>';
-    if(r.previsionAudio) html += '<div class="rc-section"><div class="rc-section-label">Prev. Audio</div><div class="rc-value"><strong style="color:var(--audio-color)">'+(r.previsionAudio||0).toLocaleString('fr-FR')+' EUR</strong></div></div>';
-    if(r.aide) html += '<div class="rc-section"><div class="rc-section-label">Aide attendue</div><div class="rc-value">'+r.aide+'</div></div>';
-    if(r.challenges&&r.challenges.length) {
-      var chHtml = '';
-      for(var p=0; p<r.challenges.length; p++) chHtml += '<span class="obj-tag">'+r.challenges[p]+'</span>';
-      html += '<div class="rc-section"><div class="rc-section-label">Challenges</div><div class="rc-value">'+chHtml+'</div></div>';
-    }
-    html += '</div>';
+    if(r.aide) html+='<div class="rc-section"><div class="rc-section-label">Aide attendue</div><div class="rc-value">'+r.aide+'</div></div>';
+    if(r.challenges&&r.challenges.length){var cht='';for(var q=0;q<r.challenges.length;q++) cht+='<span class="obj-tag">'+r.challenges[q]+'</span>';html+='<div class="rc-section"><div class="rc-section-label">Challenges</div><div class="rc-value">'+cht+'</div></div>';}
+    html+='</div>';
   }
-  rc.innerHTML = html;
+  rc.innerHTML=html;
 }
 
-function deleteResp(id) {
-  if(!confirm('Supprimer cette reponse ?')) return;
-  var newR = [];
-  for(var i=0; i<responses.length; i++) { if(responses[i].id!==id) newR.push(responses[i]); }
-  responses = newR;
-  saveData(); renderAR();
+function deleteResp(id){
+  if(!confirm('Supprimer ?')) return;
+  var nr=[];for(var i=0;i<responses.length;i++){if(responses[i].id!==id) nr.push(responses[i]);}
+  responses=nr; saveData(); renderAR();
 }
 
-function exportCSV() {
-  var filtered = filterResponses();
-  if(!filtered.length){ alert('Aucune reponse a exporter.'); return; }
-  var headers = ['Magasin','Mois','Annee','Humeur','Bilan','Budget deja','Budget mois','Budget cumul','Budget max','Budget pct','Action CA','Prev Audio','Aide','Challenges'];
-  var rows = [headers];
-  for(var i=0; i<filtered.length; i++) {
-    var r = filtered[i];
-    rows.push([
-      r.magasin, MOIS[r.mois], r.annee,
-      r.humeurEmoji||'', (r.humeurTexte||'').replace(/\n/g,' '),
-      r.budgetDeja||0, r.budgetMois||0, r.budgetCumul||0, r.budgetMax||0,
+// EXPORT 1 – Synthese globale
+function exportSynthese(){
+  var filtered=filterResponses();
+  if(!filtered.length){alert('Aucune reponse a exporter.');return;}
+  var headers=['Magasin','Mois','Annee','Humeur','Bilan','Budget deja','Budget mois','Budget cumul','Budget max','Budget pct','Action CA','Prev Audio','Aide','Challenges'];
+  var rows=[headers];
+  for(var i=0;i<filtered.length;i++){
+    var r=filtered[i];
+    rows.push([r.magasin,MOIS[r.mois],r.annee,r.humeurEmoji||'',(r.humeurTexte||'').replace(/\n/g,' '),
+      r.budgetDeja||0,r.budgetMois||0,r.budgetCumul||0,r.budgetMax||0,
       r.budgetMax>0?Math.round((r.budgetCumul||0)/r.budgetMax*100)+'%':'0%',
-      (r.actionCA||'').replace(/\n/g,' '), r.previsionAudio||0,
-      (r.aide||'').replace(/\n/g,' '),
-      (r.challenges||[]).join(' | ')
-    ]);
+      (r.actionCA||'').replace(/\n/g,' '),r.previsionAudio||0,(r.aide||'').replace(/\n/g,' '),(r.challenges||[]).join(' | ')]);
   }
-  var csv = rows.map(function(r){ return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(';'); }).join('\n');
-  var blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href=url; a.download='OC_Synthese_'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click(); URL.revokeObjectURL(url);
+  dlCSV(rows,'OC_Synthese_'+new Date().toISOString().split('T')[0]+'.csv');
+}
+
+// EXPORT 2 – Objectifs Cosium
+function exportObjectifsCosium(){
+  var filtered=filterResponses();
+  if(!filtered.length){alert('Aucune reponse a exporter.');return;}
+  var headers=['Matricule','Prenom','Nom','Magasin','Mois','Annee','Objectif EUR'];
+  var rows=[headers];
+  for(var i=0;i<filtered.length;i++){
+    var r=filtered[i];
+    if(!r.objectifs||!r.objectifs.length) continue;
+    for(var j=0;j<r.objectifs.length;j++){
+      var o=r.objectifs[j];
+      if(o.objectif>0) rows.push([o.matricule,o.prenom,o.nom,r.magasin,MOIS[r.mois],r.annee,o.objectif]);
+    }
+  }
+  if(rows.length===1){alert('Aucun objectif individuel dans les reponses importees.');return;}
+  dlCSV(rows,'OC_Objectifs_Cosium_'+new Date().toISOString().split('T')[0]+'.csv');
+}
+
+function dlCSV(rows,fname){
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=fname;a.click();URL.revokeObjectURL(url);
 }
 
 // PARAMETRES
-function loadParamMagasin() {
-  var code = document.getElementById('param-magasin').value;
-  var block = document.getElementById('param-store-block');
-  if(!code){ block.style.display='none'; return; }
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  if(!store){ block.style.display='none'; return; }
+function loadParamMagasin(){
+  var code=document.getElementById('param-magasin').value;
+  var block=document.getElementById('param-store-block');
+  if(!code){block.style.display='none';return;}
+  var store=getStore(code);
+  if(!store){block.style.display='none';return;}
   block.style.display='block';
-  document.getElementById('param-effectif').value = store.effectif;
+  document.getElementById('param-effectif').value=store.effectif;
   renderParamMembres(store.membres);
 }
 
-function renderParamMembres(membres) {
-  var cont = document.getElementById('param-membres-list');
-  var html = '';
-  for(var i=0; i<membres.length; i++) {
-    html += '<div class="obj-row" id="pm-row-'+i+'">' +
-      '<div style="flex:1;display:flex;gap:6px">' +
-      '<input type="text" value="'+membres[i].prenom+'" id="pm-prenom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px">' +
-      '<input type="text" value="'+membres[i].nom+'" id="pm-nom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px">' +
-      '</div>' +
-      '<select id="pm-role-'+i+'" style="flex:0 0 110px;font-size:12px;padding:8px 6px">' +
-      '<option value="manager"'+(membres[i].role==='manager'?' selected':'')+'>Manager</option>' +
-      '<option value="collab"'+(membres[i].role==='collab'?' selected':'')+'>Collab</option>' +
-      '</select>' +
-      '<button onclick="paramDeleteMembre('+i+')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px">x</button>' +
+function renderParamMembres(membres){
+  var cont=document.getElementById('param-membres-list');
+  var html='';
+  for(var i=0;i<membres.length;i++){
+    html+='<div class="obj-row" id="pm-row-'+i+'">'+
+      '<input type="text" value="'+membres[i].prenom+'" id="pm-prenom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px;margin-right:4px">'+
+      '<input type="text" value="'+membres[i].nom+'" id="pm-nom-'+i+'" style="flex:1;font-size:13px;padding:8px 10px;margin-right:4px">'+
+      '<input type="text" value="'+(membres[i].matricule||'')+'" id="pm-mat-'+i+'" placeholder="Matr." style="flex:0 0 70px;font-size:12px;padding:8px 6px;margin-right:4px">'+
+      '<select id="pm-role-'+i+'" style="flex:0 0 100px;font-size:12px;padding:8px 4px">'+
+      '<option value="manager"'+(membres[i].role==='manager'?' selected':'')+'>Manager</option>'+
+      '<option value="collab"'+(membres[i].role==='collab'?' selected':'')+'>Collab</option>'+
+      '</select>'+
+      '<button onclick="paramDeleteMembre('+i+')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px 6px">x</button>'+
       '</div>';
   }
-  cont.innerHTML = html;
+  cont.innerHTML=html;
 }
 
-function paramDeleteMembre(i) {
-  var code = document.getElementById('param-magasin').value;
-  var store = null;
-  for(var j=0; j<STORES.length; j++) { if(STORES[j].code===code){ store=STORES[j]; break; } }
-  if(!store) return;
-  store.membres.splice(i,1);
+function paramDeleteMembre(i){
+  var code=document.getElementById('param-magasin').value;
+  var store=getStore(code);if(!store) return;
+  store.membres.splice(i,1); renderParamMembres(store.membres);
+}
+
+function paramAddMembre(){
+  var code=document.getElementById('param-magasin').value;
+  var store=getStore(code);if(!store) return;
+  store.membres.push({matricule:'',prenom:'Prenom',nom:'Nom',role:'collab'});
   renderParamMembres(store.membres);
 }
 
-function paramAddMembre() {
-  var code = document.getElementById('param-magasin').value;
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  if(!store) return;
-  store.membres.push({prenom:'Prenom', nom:'Nom', role:'collab'});
-  renderParamMembres(store.membres);
-}
-
-function saveParamMagasin() {
-  var code = document.getElementById('param-magasin').value;
-  var store = null;
-  for(var i=0; i<STORES.length; i++) { if(STORES[i].code===code){ store=STORES[i]; break; } }
-  if(!store) return;
-  store.effectif = parseInt(document.getElementById('param-effectif').value)||store.effectif;
-  var newMembres = [];
-  var rows = document.querySelectorAll('[id^="pm-prenom-"]');
-  for(var j=0; j<rows.length; j++) {
-    newMembres.push({
-      prenom: document.getElementById('pm-prenom-'+j).value.trim(),
-      nom:    document.getElementById('pm-nom-'+j).value.trim(),
-      role:   document.getElementById('pm-role-'+j).value
+function saveParamMagasin(){
+  var code=document.getElementById('param-magasin').value;
+  var store=getStore(code);if(!store) return;
+  store.effectif=parseInt(document.getElementById('param-effectif').value)||store.effectif;
+  var rows=document.querySelectorAll('[id^="pm-prenom-"]');
+  var newM=[];
+  for(var j=0;j<rows.length;j++){
+    newM.push({
+      prenom:document.getElementById('pm-prenom-'+j).value.trim(),
+      nom:document.getElementById('pm-nom-'+j).value.trim(),
+      matricule:document.getElementById('pm-mat-'+j).value.trim(),
+      role:document.getElementById('pm-role-'+j).value
     });
   }
-  store.membres = newMembres;
-  // Sauvegarder dans localStorage
-  try { localStorage.setItem('oc_stores_custom', JSON.stringify(STORES)); } catch(e){}
-  // Rafraichir le select magasin du formulaire
-  var selF = document.getElementById('sel-magasin');
-  selF.innerHTML = '<option value="">— Selectionner votre magasin —</option>';
-  for(var k=0; k<STORES.length; k++) {
-    var s = STORES[k];
-    var mgr = null;
-    for(var m=0; m<s.membres.length; m++) { if(s.membres[m].role==='manager'){ mgr=s.membres[m]; break; } }
-    var label = s.name + (mgr ? ' - ' + mgr.prenom + ' ' + mgr.nom : '');
-    var opt = document.createElement('option'); opt.value=s.code; opt.textContent=label; selF.appendChild(opt);
+  store.membres=newM;
+  try{localStorage.setItem('oc_stores_v5',JSON.stringify(STORES));}catch(e){}
+  // refresh selects formulaire
+  var selF=document.getElementById('sel-magasin');
+  selF.innerHTML='<option value="">— Selectionner votre magasin —</option>';
+  for(var k=0;k<STORES.length;k++){
+    var s=STORES[k],mgr=null;
+    for(var m=0;m<s.membres.length;m++){if(s.membres[m].role==='manager'){mgr=s.membres[m];break;}}
+    var o=document.createElement('option');o.value=s.code;o.textContent=s.name+(mgr?' - '+mgr.prenom+' '+mgr.nom:'');selF.appendChild(o);
   }
   showToast('Magasin sauvegarde !');
 }
 
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
 }
 
 init();
